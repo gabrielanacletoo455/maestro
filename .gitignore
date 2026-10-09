@@ -1,0 +1,38 @@
+# Dependencias (o projeto e zero-deps, mas por garantia)
+node_modules/
+
+# Notas de cada dev: banco, backups, imagens, logs e estado do Maestro. NUNCA sobem.
+data/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.log
+
+# Espelho em Markdown das notas (gerado a partir do banco) e as pastas temporarias da troca
+notas-md/
+notas-md.tmp-*/
+notas-md.old-*/
+
+# Gabarito de teste do Maestro: feito com as notas pessoais do Gabriel
+maestro/perguntas-teste.md
+maestro/testes.json
+maestro/testes-lembretes.json
+
+# Historico pessoal de desenvolvimento
+TASK.md
+
+# Segredos e configuracoes locais
+.env
+.env.*
+*.pem
+*.key
+.claude/settings.local.json
+
+# Sistema operacional e editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp

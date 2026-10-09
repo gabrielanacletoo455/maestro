@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash(chflags:*)",
+      "Edit(/CLAUDE.md)",
+      "Write(/CLAUDE.md)",
+      "Edit(/data/**)",
+      "Write(/data/**)",
+      "Edit(/notas-md/**)",
+      "Write(/notas-md/**)"
+    ],
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(sqlite3:*)",
+      "Bash(git reset:*)",
+      "Bash(git clean:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

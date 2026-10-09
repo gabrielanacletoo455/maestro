@@ -1,0 +1,25 @@
+{
+  "name": "maestro",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Maestro — workspace de notas local com node:sqlite. Zero dependencias.",
+  "scripts": {
+    "start": "node --no-warnings src/server.js",
+    "dev": "node --no-warnings --watch src/server.js",
+    "autostart:install": "./scripts/autostart.sh install",
+    "autostart:uninstall": "./scripts/autostart.sh uninstall",
+    "autostart:status": "./scripts/autostart.sh status",
+    "backup": "node --no-warnings -e \"import('./src/backup.js').then(m=>console.log(m.backupNow('cli')))\"",
+    "maestro": "node --no-warnings maestro/cli.js",
+    "maestro:teste": "node --no-warnings maestro/eval.js",
+    "setup": "node --no-warnings scripts/setup.mjs",
+    "desinstalar": "node --no-warnings scripts/desinstalar.mjs"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "bin": {
+    "maestro": "maestro/cli.js"
+  }
+}

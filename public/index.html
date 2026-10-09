@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Maestro</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    // Aplica o tema antes do primeiro paint para nao piscar branco ao carregar.
+    (function () {
+      var mode = localStorage.getItem('themeMode') || localStorage.getItem('theme') || 'system';
+      var dark = mode === 'dark' ||
+        (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      document.documentElement.dataset.themeMode = mode;
+      try {
+        var w = Number(localStorage.getItem('sidebarWidth'));
+        if (w) document.documentElement.style.setProperty('--sidebar-w', w + 'px');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo-32.png" />
+  <link rel="apple-touch-icon" href="/logo-180.png" />
+</head>
+<body>
+  <div id="app">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar__top">
+        <button class="workspace" id="workspace" title="Abrir configuracoes">
+          <img class="workspace__badge" src="/logo.png" alt="" />
+          <span>Maestro</span>
+          <span class="workspace__chevron">⌄</span>
+        </button>
+        <button class="icon-btn" id="btn-collapse" data-shortcut-title="\\"
+                title="Recolher ({mod})">«</button>
+      </div>
+
+      <div class="sidebar__scroll">
+        <div class="nav-item nav-item--action" id="btn-search">
+          🔍 Buscar
+          <span class="nav-item__key" data-shortcut="K"></span>
+        </div>
+        <div class="nav-item nav-item--action" id="btn-trash">🗑️ Lixeira</div>
+
+        <div class="sidebar__section" id="favorites-section" hidden>
+          <div class="sidebar__label">Favoritos</div>
+          <div id="favorites"></div>
+        </div>
+
+        <div class="sidebar__section">
+          <div class="sidebar__label">Paginas</div>
+          <div id="tree"></div>
+          <div class="nav-item nav-item--action" id="btn-new-page">＋ Nova pagina</div>
+        </div>
+      </div>
+
+      <div class="sidebar__footer">
+        <div class="nav-item nav-item--action" id="btn-settings">
+          ⚙ Configuracoes
+          <span class="nav-item__key" data-shortcut=","></span>
+        </div>
+      </div>
+      <div class="sidebar__resizer" id="sidebar-resizer"
+           title="Arraste para ajustar a largura · duplo clique volta ao padrao"></div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar" id="topbar">
+        <button class="icon-btn" id="btn-expand" hidden title="Abrir menu">»</button>
+        <nav class="breadcrumb" id="breadcrumb"></nav>
+        <div class="topbar__spacer"></div>
+        <button class="topbar__btn" id="btn-favorite" title="Favoritar">☆</button>
+        <button class="topbar__btn" id="btn-delete" title="Mover para lixeira">🗑️</button>
+      </header>
+
+      <div class="scroller" id="scroller">
+        <div id="page-root"></div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
