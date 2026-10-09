@@ -36,8 +36,8 @@ npm run desinstalar
 ## Rodar
 
 ```bash
-cd anotacoes-gab
-npm start          # http://localhost:4321
+cd maestro
+npm start          # http://localhost:4321 (so se nao usar o inicio automatico)
 ```
 
 `npm run dev` roda com `--watch`. `npm run backup` tira um snapshot na hora.
@@ -60,22 +60,23 @@ curl localhost:4321/api/backups    # listar snapshots
 Para restaurar: pare o servidor, copie o snapshot por cima de
 `data/anotacoes.db` e apague os arquivos `-wal`/`-shm` que sobraram.
 
-## Iniciar junto com o Mac
+## Iniciar junto com o sistema
 
-```bash
-npm run autostart:install
-```
+O instalador ja configura isso; nada a fazer a mao.
 
-Instala um LaunchAgent do usuario (`~/Library/LaunchAgents/com.anotacoesgab.server.plist`)
-com `RunAtLoad` e `KeepAlive`: sobe no login e reinicia sozinho se cair.
-Logs em `data/logs/server.log` e `data/logs/server.error.log`.
+| Sistema | Como | Onde |
+|---|---|---|
+| Mac | LaunchAgent do usuario: sobe no login e reinicia sozinho se cair | `~/Library/LaunchAgents/com.maestro.app.plist` |
+| Windows | Atalho escondido na pasta Inicializar: sobe no login, sem janela | `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\Maestro.vbs` |
+| Linux | ainda manual | `npm start` |
 
-```bash
-npm run autostart:status      # ver se esta rodando e qual o PID
-npm run autostart:uninstall   # remover do login
-```
+Logs em `data/logs/`. Para parar de iniciar com o sistema: `npm run desinstalar`
+(remove tambem a skill, os hooks e o comando; as notas ficam).
 
-Para mudar a porta: `PORT=5000 npm run autostart:install`.
+Reiniciar o app:
+
+- Mac: `launchctl kickstart -k gui/$(id -u)/com.maestro.app`
+- Windows: encerre o processo `node` do Maestro no Gerenciador de Tarefas e de dois cliques no `Maestro.vbs`.
 
 ## Funcionalidades
 
@@ -141,7 +142,10 @@ src/repo.js     operacoes de pagina e bloco + export do workspace
 src/uploads.js  gravacao/leitura das imagens em data/uploads
 src/backup.js   snapshots automaticos do banco em data/backups
 src/server.js   roteador HTTP + estatico + /uploads + fallback SPA
-scripts/autostart.sh   instala/remove o LaunchAgent do login
+scripts/setup.mjs      instalacao (chamado pelo instalar.sh / instalar.cmd)
+scripts/desinstalar.mjs
+scripts/lib-instalacao.mjs  etapas: inicio automatico, comando, skill, hooks
+maestro/         busca local (maestro.js, cli.js), lembretes, hooks e a skill
 public/js/
   app.js         boot, rotas, atalhos globais
   editor.js      editor de blocos (caret, split, merge, drag, imagens)
