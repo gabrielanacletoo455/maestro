@@ -24,7 +24,13 @@ O instalador:
 5. adiciona os hooks de lembretes no `~/.claude/settings.json` (com copia de seguranca antes;
    se o arquivo ja estiver com erro, nao mexe e explica o que corrigir).
 
-Depois, abra uma **conversa nova** no Claude Code. Para simular sem mudar nada: `./instalar.sh --dry-run`.
+Depois, abra uma **conversa nova** no Claude Code.
+
+**Memoria automatica:** a cada 30 min o app le as conversas do Claude Code (`~/.claude/projects/`) e
+anota o que vale lembrar na pagina da task (pela branch) e no Diario, **sem IA e sem custo**
+(`src/extrator.js`). Na primeira vez que o app abre, ele pergunta se voce quer importar as conversas
+antigas; os resumos ficam esperando revisao e nada entra nas paginas sem voce aprovar.
+Opcional: `MAESTRO_RESUMIDOR=claude` usa o Haiku pelo Claude de terminal (precisa de `/login`). Para simular sem mudar nada: `./instalar.sh --dry-run`.
 Se algo falhar, o instalador mostra em qual passo parou e o erro.
 
 Para desinstalar (as notas em `data/` nunca sao apagadas):

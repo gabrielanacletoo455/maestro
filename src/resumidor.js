@@ -16,6 +16,7 @@ import { registrar, tipoPelaBranch, MODELO_TASK, MODELO_CHAMADO } from './regist
 import { limparTudo } from './sensivel.js';
 import { pages, blocks } from './repo.js';
 import { db } from './db.js';
+import { resumirSemIA } from './extrator.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PASTA_ESTADO = process.env.MAESTRO_ESTADO_DIR ?? join(ROOT, 'data', 'maestro');
@@ -79,7 +80,7 @@ export function listarConversas() {
   return out;
 }
 
-function lerDesde(caminho, offset) {
+export function lerDesde(caminho, offset) {
   const tamanho = statSync(caminho).size;
   if (tamanho <= offset) return { linhas: [], fim: offset };
   const fd = openSync(caminho, 'r');
@@ -117,7 +118,7 @@ function resumoDeFerramenta(b) {
 }
 
 /** Transforma linhas do .jsonl em trechos por (cwd, branch), so com o que importa. */
-function extrairTrechos(linhas) {
+export function extrairTrechos(linhas) {
   const trechos = [];
   let atual = null;
   for (const linha of linhas) {
@@ -127,7 +128,7 @@ function extrairTrechos(linhas) {
     const branch = o.gitBranch && o.gitBranch !== 'HEAD' ? o.gitBranch : '';
     const cwd = o.cwd ?? '';
     if (!atual || atual.branch !== branch || atual.cwd !== cwd) {
-      atual = { branch, cwd, partes: [], usuario: 0, inicio: o.timestamp, fim: o.timestamp, sessao: o.sessionId };
+      atual = { branch, cwd, partes: [], msgs: [], usuario: 0, inicio: o.timestamp, fim: o.timestamp, sessao: o.sessionId };
       trechos.push(atual);
     }
     atual.fim = o.timestamp ?? atual.fim;
@@ -138,12 +139,16 @@ function extrairTrechos(linhas) {
       if (t.length < 2) continue;
       atual.usuario += 1;
       atual.partes.push(`DEV: ${t.slice(0, 3000)}`);
+      atual.msgs.push({ quem: 'dev', texto: t, quando: o.timestamp });
     } else if (Array.isArray(c)) {
       for (const b of c) {
-        if (b.type === 'text' && b.text.trim()) atual.partes.push(`CLAUDE: ${b.text.trim().slice(0, 2500)}`);
-        else if (b.type === 'tool_use') {
+        if (b.type === 'text' && b.text.trim()) {
+          atual.partes.push(`CLAUDE: ${b.text.trim().slice(0, 2500)}`);
+          atual.msgs.push({ quem: 'claude', texto: b.text.trim(), quando: o.timestamp });
+        } else if (b.type === 'tool_use') {
           const r = resumoDeFerramenta(b);
           if (r) atual.partes.push(`CLAUDE ${r}`);
+          atual.msgs.push({ quem: 'ferramenta', nome: b.name, entrada: b.input ?? {}, quando: o.timestamp });
         }
       }
     }
@@ -249,6 +254,17 @@ function chamarHaiku(prompt) {
   });
 }
 
+/**
+ * Quem resume: por padrao o extrator local (sem IA, sem login, sem custo).
+ * MAESTRO_RESUMIDOR=claude usa o Haiku pelo Claude de terminal (precisa de /login).
+ */
+async function resumir(trecho) {
+  if (process.env.MAESTRO_RESUMIDOR === 'claude' || process.env.MAESTRO_RESUMIDOR_CMD) {
+    return chamarHaiku(promptDeResumo(trecho));
+  }
+  return resumirSemIA(trecho);
+}
+
 /* ------------------------------ modo continuo ------------------------------ */
 
 let ocupado = false;
@@ -270,6 +286,12 @@ function contextoDe(trecho) {
     quando: Date.parse(trecho.fim) || Date.now(),
     sessao: trecho.sessao,
   };
+}
+
+/** O extrator pode concluir que a conversa nao era sobre a branch (arquivos de outro projeto). */
+function ajustarContexto(ctx, resumo) {
+  if (resumo?.branchUsada === undefined) return ctx;
+  return { ...ctx, branch: resumo.branchUsada, projeto: resumo.projetoReal ?? ctx.projeto };
 }
 
 function tratarErro(e, err) {
@@ -296,8 +318,8 @@ export async function rodarContinuo({ forcar = false } = {}) {
       const { linhas, fim } = lerDesde(arq.caminho, info.offset);
       const trechos = extrairTrechos(linhas);
       for (const t of trechos) {
-        const resumo = await chamarHaiku(promptDeResumo(t));
-        feitos.push(registrar(resumo, contextoDe(t)));
+        const resumo = await resumir(t);
+        feitos.push(registrar(resumo, ajustarContexto(contextoDe(t), resumo)));
       }
       e.arquivos[arq.caminho] = { offset: fim };
       salvarEstado(e);
@@ -367,10 +389,10 @@ async function processarUmaDaFila(e) {
     linhas = corte;
   }
   for (const t of extrairTrechos(linhas)) {
-    const bruto = await chamarHaiku(promptDeResumo(t));
+    const bruto = await resumir(t);
     if (bruto.relevante === false) continue;
     const { valor } = limparTudo(bruto);
-    e.pendentes.push({ id: `imp_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, arquivo, resumo: valor, contexto: contextoDe(t) });
+    e.pendentes.push({ id: `imp_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, arquivo, resumo: valor, contexto: ajustarContexto(contextoDe(t), bruto) });
   }
   e.fila.shift();
   e.hora.feitas += 1;

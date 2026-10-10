@@ -109,7 +109,23 @@ export function acharPaginaDaTask(branch) {
   for (const c of candidatos) if (primeirosBlocos(c.id).some((t) => t.includes(branchN))) return c.id;
   const cabecalho = new RegExp(`(task|chamado) clickup\\W+${id}\\b`);
   for (const c of candidatos) if (primeirosBlocos(c.id).some((t) => cabecalho.test(t))) return c.id;
-  return candidatos.find((c) => norm(c.title).includes(id))?.id ?? null;
+  const peloId = candidatos.find((c) => norm(c.title).includes(id))?.id;
+  if (peloId) return peloId;
+
+  // Sem o id anotado: a pagina cujo titulo tem quase todas as palavras do nome da branch.
+  const palavras = branch
+    .replace(/^[\w-]+\/[a-z0-9]{6,12}-/i, '')
+    .split(/[-_]+/)
+    .map(norm)
+    .filter((w) => w.length >= 4);
+  if (palavras.length < 2) return null;
+  let melhor = null;
+  for (const p of paginasVivas()) {
+    const t = norm(p.title);
+    const acertos = palavras.filter((w) => t.includes(w)).length / palavras.length;
+    if (acertos >= 0.7 && (!melhor || acertos > melhor.acertos)) melhor = { id: p.id, acertos };
+  }
+  return melhor?.id ?? null;
 }
 
 function sprintAtual() {

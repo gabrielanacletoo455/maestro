@@ -84,10 +84,9 @@ console.log(
         `     App:  http://localhost:${lib.PORT}`,
         '     Abra uma CONVERSA NOVA no Claude Code para ele comecar a usar a memoria.',
         '',
-        '     Escrita automatica (o Claude anota sozinho o que voce faz):',
-        '       rode `claude` no terminal e faca /login UMA vez — o resumo usa o Haiku do seu plano.',
-        '     Importar suas conversas antigas para o Maestro (pergunta antes, voce aprova):',
-        '       maestro importar',
+        '     Escrita automatica ligada: a cada 30 min o Maestro le suas conversas do Claude Code',
+        '     e anota sozinho (sem IA, sem custo). Na primeira vez que abrir o app ele pergunta',
+        '     se voce quer importar as conversas antigas — nada entra sem voce aprovar.',
         '     Para desinstalar: npm run desinstalar  (suas notas em data/ nunca sao apagadas)',
         '',
       ].join('\n')
