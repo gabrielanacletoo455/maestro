@@ -1,5 +1,6 @@
 import { api } from './api.js';
 import { theme, THEME_MODES } from './theme.js';
+import { perguntarImportacao, abrirRevisao } from './memoria.js';
 
 function overlay(inner, onClose) {
   const el = document.createElement('div');
@@ -187,9 +188,30 @@ export function openSettings() {
       </section>
 
       <section class="settings__section">
+        <div class="settings__label">Memória do Claude</div>
+        <div class="settings__hint">
+          O Claude anota sozinho o que você faz nas conversas do Claude Code e lembra disso depois.
+        </div>
+        <div class="settings__row">
+          <div class="menu__label">
+            <span>Importar conversas antigas</span>
+            <span class="menu__desc">Lê as conversas que você já teve e guarda só o que vale lembrar, para você revisar.</span>
+          </div>
+          <button class="settings__btn" data-act="importar">Importar…</button>
+        </div>
+        <div class="settings__row">
+          <div class="menu__label">
+            <span>Revisar importação</span>
+            <span class="menu__desc">Resumos esperando sua aprovação antes de virar nota.</span>
+          </div>
+          <button class="settings__btn" data-act="revisar">Revisar</button>
+        </div>
+      </section>
+
+      <section class="settings__section">
         <div class="settings__label">Dados</div>
         <div class="settings__hint">
-          Tudo fica em <code>data/notion.db</code>; as imagens em <code>data/uploads/</code>.
+          Tudo fica em <code>data/anotacoes.db</code>; as imagens em <code>data/uploads/</code>.
         </div>
         <div class="settings__row">
           <div class="menu__label">
@@ -227,6 +249,15 @@ export function openSettings() {
       paintSelection();
     })
   );
+
+  panel.querySelector('[data-act="importar"]').addEventListener('click', () => {
+    close();
+    perguntarImportacao({ forcar: true });
+  });
+  panel.querySelector('[data-act="revisar"]').addEventListener('click', () => {
+    close();
+    abrirRevisao();
+  });
 
   panel.querySelector('[data-act="export"]').addEventListener('click', () => {
     const assets = panel.querySelector('#export-assets').checked ? '1' : '0';

@@ -557,3 +557,47 @@ button { font-family: inherit; color: inherit; cursor: pointer; }
   background: var(--text-faint); border-radius: 6px;
   border: 3px solid transparent; background-clip: content-box;
 }
+
+/* ------------------------- memoria do claude ------------------------------ */
+
+.memoria { width: min(560px, 92vw); }
+.memoria--larga { width: min(760px, 94vw); max-height: 84vh; }
+.memoria__texto { font-size: 14px; line-height: 1.55; margin: 14px 0 0; }
+.memoria__lista { font-size: 13px; color: var(--text-muted); line-height: 1.6; padding-left: 18px; margin: 10px 0 0; }
+.memoria__opcoes { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
+.memoria__opcao {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left;
+  border: 1px solid var(--border); background: transparent; color: var(--text);
+  border-radius: 6px; padding: 10px 14px; font-size: 14px;
+}
+.memoria__opcao span { font-size: 12px; color: var(--text-muted); }
+.memoria__opcao:hover:not(:disabled) { border-color: var(--accent); background: var(--bg-hover); }
+.memoria__opcao:disabled { opacity: 0.5; cursor: default; }
+.memoria__opcao--nao { border-style: dashed; }
+.memoria__aviso {
+  margin-top: 14px; padding: 10px 12px; border-radius: 6px; font-size: 13px; line-height: 1.5;
+  background: rgba(235, 87, 87, 0.1); border: 1px solid rgba(235, 87, 87, 0.35);
+}
+.memoria__aviso code, .memoria__texto code {
+  background: var(--code-bg); border-radius: 3px; padding: 1px 5px; font-family: var(--mono); font-size: 12px;
+}
+.memoria__itens { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.memoria__item {
+  display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+  border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px;
+}
+.memoria__item input { margin-top: 3px; accent-color: var(--accent); }
+.memoria__titulo { font-size: 14px; font-weight: 600; }
+.memoria__meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.memoria__resumo { font-size: 13px; margin-top: 6px; line-height: 1.5; }
+.memoria__item details { margin-top: 6px; font-size: 13px; }
+.memoria__item summary { color: var(--accent); cursor: pointer; font-size: 12px; }
+.memoria__secao { margin-top: 8px; }
+.memoria__secao ul { margin: 2px 0 0; padding-left: 18px; color: var(--text-muted); line-height: 1.5; }
+.memoria__rodape {
+  display: flex; justify-content: flex-end; gap: 8px;
+  padding: 12px 16px; border-top: 1px solid var(--border);
+}
+.settings__btn--primario { background: var(--accent); border-color: var(--accent); color: #fff; }
+.settings__btn--primario:hover { background: var(--accent); filter: brightness(1.08); }
+.memoria__indicador { font-size: 13px; color: var(--accent); }

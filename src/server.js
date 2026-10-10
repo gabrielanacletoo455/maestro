@@ -6,6 +6,8 @@ import { pages, blocks, search, exportAll } from './repo.js';
 import { saveUpload, readUpload, listUploads, MAX_UPLOAD_BYTES } from './uploads.js';
 import { startAutoBackup, backupNow, listBackups, BACKUP_DIR } from './backup.js';
 import { mirrorNow, scheduleMirror, MIRROR_DIR } from './mirror.js';
+import { registrar } from './registro.js';
+import * as resumidor from './resumidor.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PUBLIC = join(ROOT, 'public');
@@ -69,6 +71,20 @@ const routes = [
     blocks.replaceAll(m[1], body.blocks ?? []),
   ],
   ['PATCH', /^\/api\/blocks\/([\w-]+)$/, (m, body) => blocks.update(m[1], body)],
+
+  // Escrita automatica e importacao de conversas (Maestro)
+  ['POST', /^\/api\/maestro\/registrar$/, (_m, body) => registrar(body.resumo, body.contexto)],
+  ['POST', /^\/api\/maestro\/resumir$/, () => resumidor.rodarContinuo({ forcar: true })],
+  ['GET', /^\/api\/maestro\/status$/, () => resumidor.status()],
+  ['GET', /^\/api\/maestro\/boas-vindas$/, () => resumidor.boasVindas()],
+  ['POST', /^\/api\/maestro\/importacao\/responder$/, (_m, body) => resumidor.responderImportacao(body.escolha)],
+  ['POST', /^\/api\/maestro\/importacao\/candidatos$/, (_m, body) => resumidor.candidatosImportacao(body)],
+  ['POST', /^\/api\/maestro\/importacao$/, (_m, body) => resumidor.iniciarImportacao(body.arquivos ?? [])],
+  ['POST', /^\/api\/maestro\/importacao\/rodar$/, (_m, body) => resumidor.rodarFila({ max: body.max ?? null })],
+  ['GET', /^\/api\/maestro\/importacao\/pendentes$/, () => resumidor.pendentesAbertos()],
+  ['POST', /^\/api\/maestro\/importacao\/aprovar$/, (_m, body) => resumidor.aprovar(body.indices ?? 'todos')],
+  ['POST', /^\/api\/maestro\/importacao\/descartar$/, (_m, body) => resumidor.descartar(body.indices ?? [])],
+  ['POST', /^\/api\/maestro\/importacao\/cancelar$/, () => resumidor.cancelarImportacao()],
   ['DELETE', /^\/api\/blocks\/([\w-]+)$/, (m) => blocks.remove(m[1])],
 ];
 
@@ -163,7 +179,7 @@ const server = createServer(async (req, res) => {
     if (!match || req.method !== method) continue;
     try {
       const body = ['POST', 'PATCH', 'PUT'].includes(method) ? await readBody(req) : null;
-      return json(res, 200, handler(match, body) ?? { ok: true });
+      return json(res, 200, (await handler(match, body)) ?? { ok: true });
     } catch (err) {
       return json(res, err.status ?? 500, { error: err.message });
     }
@@ -175,6 +191,7 @@ const server = createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`\n  Maestro rodando em http://localhost:${PORT}`);
   startAutoBackup();
+  resumidor.iniciarResumidor();
   const mirrored = mirrorNow();
   if (mirrored) console.log(`  Espelho md: ${MIRROR_DIR} (${mirrored.pages} paginas)`);
   console.log(`  Banco: ${process.env.DB_PATH ?? join(ROOT, 'data', 'anotacoes.db')}\n`);

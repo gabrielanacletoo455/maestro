@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { db } from './db.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-export const BACKUP_DIR = join(ROOT, 'data', 'backups');
+export const BACKUP_DIR = process.env.BACKUP_DIR ?? join(ROOT, 'data', 'backups');
 
 const RECENT_MS = 48 * 60 * 60 * 1000; // nas ultimas 48h guarda todos os snapshots
 const INTERVAL_MS = 15 * 60 * 1000;    // de quanto em quanto tempo tirar um novo

@@ -4,6 +4,7 @@ import { Sidebar } from './sidebar.js';
 import { openSearch, openTrash, openSettings, toast } from './overlays.js';
 import { theme } from './theme.js';
 import { shortcut } from './platform.js';
+import { iniciarMemoria } from './memoria.js';
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -238,6 +239,8 @@ for (const el of document.querySelectorAll('[data-shortcut-title]')) {
 
 (async function boot() {
   theme.apply();
+  iniciarMemoria();
+  window.addEventListener('maestro:notas-mudaram', () => sidebar.refresh());
 
   if (localStorage.getItem('sidebarCollapsed')) toggleSidebar();
 
